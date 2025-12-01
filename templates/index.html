@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hero/Landing Section - Cat vs Dog Detective</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;family=Poppins:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+      .font-display-poppins {
+        font-family: 'Poppins', sans-serif;
+      }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#4894e5",
+              "background-light": "#f6f7f8",
+              "background-dark": "#111921",
+              "dog-orange": "#F5A623",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-[#2D3748] dark:text-gray-200">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 px-6 sm:px-10 py-4">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8">
+<svg fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0007 10.5867L16.9504 5.63696L18.3646 7.05118L13.4149 12.0009L18.3646 16.9506L16.9504 18.3648L12.0007 13.4151L7.05093 18.3648L5.63672 16.9506L10.5865 12.0009L5.63672 7.05118L7.05093 5.63696L12.0007 10.5867Z"></path></svg>
+</div>
+<h2 class="font-display-poppins text-xl font-bold leading-tight tracking-[-0.015em] text-[#2D3748] dark:text-gray-100">Cat vs Dog Detective</h2>
+</div>
+</header>
+<main class="flex-1">
+<!-- HeroSection -->
+<div class="px-4 py-16 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-4xl">
+<div class="flex flex-col items-center gap-12 @container">
+<div class="relative flex w-full items-center justify-center">
+<!-- Cat SVG -->
+<div class="absolute -left-10 top-1/2 -translate-y-1/2 opacity-70 w-24 h-24 sm:w-32 sm:h-32 text-primary">
+<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.75h.008v.008H9v-.008zm6 0h.008v.008H15v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="flex flex-col gap-6 text-center max-w-lg">
+<h1 class="font-display-poppins text-[#2D3748] dark:text-white text-4xl font-bold leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:leading-tight">
+                                        Cat vs Dog Detective
+                                    </h1>
+<h2 class="text-base font-normal leading-normal text-gray-600 dark:text-gray-300 @[480px]:text-lg">
+                                        Upload or snap a photo to find out!
+                                    </h2>
+</div>
+<!-- Dog SVG -->
+<div class="absolute -right-10 top-1/2 -translate-y-1/2 opacity-70 w-24 h-24 sm:w-32 sm:h-32 text-dog-orange">
+<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 10.5h.008v.008H9v-.008zm6 0h.008v.008H15v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl bg-gray-200 dark:bg-gray-800" data-alt="A playful abstract background with paw prints and geometric shapes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBv_DyegBMKVsiw6aM9z5m5QCzPbsQwewxJo8dWGmV8N1-1ouARtte4Lc0poYktgfHx_vNU4xCMqu7WNbTPG174jqFBpN3JG0RE9oSd6GmXYQdOTcVo4TH1ek0xalUc-VoC6bgNX5fLuf9lUBGXx2i0JmTZZhdgSdwr2HGNqzPldQwP-DRFUGL6VO2L7JRotXjfqANN4pK3IIgtWkRO12Q8oarYYVrfU4LqDw3SOfBzo_qBPgU5x5nHOf4KIXKMNiZ7OXr7F9paq5s");'></div>
+<div class="flex flex-col sm:flex-row flex-wrap gap-4 justify-center w-full">
+<button onclick="window.location.href='/upload'" class="flex w-full sm:w-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] transition-colors hover:bg-primary/90">
+<span class="material-symbols-outlined">upload_file</span>
+<span class="truncate">Upload Image</span>
+</button>
+<button onclick="window.location.href='/camera'" class="flex w-full sm:w-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-12 px-6 bg-dog-orange text-white text-base font-bold leading-normal tracking-[0.015em] transition-colors hover:bg-dog-orange/90">
+<span class="material-symbols-outlined">photo_camera</span>
+<span class="truncate">Use Camera</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

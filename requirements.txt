@@ -1,0 +1,16 @@
+# Core Flask
+Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.2
+
+# Machine Learning - Latest stable for Python 3.12
+torch==2.9.0
+torchvision==0.24.0
+
+# Image Processing
+Pillow==10.4.0
+numpy==1.26.4
+
+# Development/Testing
+python-dotenv==1.0.0
+gunicorn==21.2.0

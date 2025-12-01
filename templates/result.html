@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Results Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .font-roboto-mono {
+            font-family: "Roboto Mono", monospace;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4894e5",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                        "cat-blue": "#4894e5",
+                        "dog-orange": "#f5a623",
+                        "text-light": "#0e141b",
+                        "text-light-secondary": "#507295",
+                        "text-dark": "#f6f7f8",
+                        "text-dark-secondary": "#a0aec0",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 px-6 md:px-10 py-4">
+<div class="flex items-center gap-4 text-text-light dark:text-text-dark">
+<div class="size-6 text-primary">
+<svg fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7.03 8-11.5C20 5.81 16.19 2 11.5 2zm0 15c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"></path>
+<path d="M10 11H8v2h2v-2zm4 0h-2v2h2v-2z"></path>
+</svg>
+</div>
+<h2 class="text-lg font-bold tracking-tight">Cat vs Dog Detective</h2>
+</div>
+</header>
+<main class="flex flex-1 justify-center p-4 sm:p-6 md:p-10">
+<div class="flex w-full max-w-7xl flex-col items-center gap-8 lg:flex-row lg:items-start">
+<!-- Left Column: Image Display -->
+<div class="w-full flex-1 lg:max-w-xl">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-200 dark:bg-background-dark/50">
+<img id="resultImage" class="h-full w-full object-cover" src="" alt="Classified image"/>
+</div>
+</div>
+<!-- Right Column: Prediction Card & Actions -->
+<div class="w-full flex-1 max-w-lg">
+<div class="flex flex-col gap-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-background-dark/70 p-6 md:p-8">
+<!-- Prediction Heading -->
+<div class="flex flex-col gap-3">
+<p id="predictionText" class="text-4xl font-black leading-tight tracking-[-0.033em] md:text-5xl">CAT DETECTED!</p>
+<p class="text-text-light-secondary dark:text-text-dark-secondary text-base font-normal leading-normal">Our model is <span id="confidenceText" class="font-roboto-mono font-bold text-text-light dark:text-text-dark">95.3%</span> confident.</p>
+</div>
+<!-- Confidence Bars -->
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-baseline justify-between">
+<p class="text-text-light dark:text-text-dark text-sm font-medium">Cat</p>
+<p id="catPercent" class="font-roboto-mono text-cat-blue text-sm font-bold">95.3%</p>
+</div>
+<div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+<div id="catBar" class="h-2 rounded-full bg-cat-blue" style="width: 95.3%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-baseline justify-between">
+<p class="text-text-light dark:text-text-dark text-sm font-medium">Dog</p>
+<p id="dogPercent" class="font-roboto-mono text-sm font-bold">4.7%</p>
+</div>
+<div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+<div id="dogBar" class="h-2 rounded-full bg-dog-orange" style="width: 4.7%;"></div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-4 flex flex-col gap-4">
+<button onclick="window.location.href='/'" class="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-base font-bold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]">
+<span class="material-symbols-outlined text-xl">refresh</span>
+<span>Try Another Image</span>
+</button>
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+<button onclick="shareResult()" class="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 dark:bg-gray-800 px-6 py-3 text-base font-semibold text-text-light dark:text-text-dark transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-xl">share</span>
+<span>Share</span>
+</button>
+<button onclick="saveResult()" class="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 dark:bg-gray-800 px-6 py-3 text-base font-semibold text-text-light dark:text-text-dark transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined text-xl">save</span>
+<span>Save Result</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<script>
+// Load result from session storage
+window.addEventListener('DOMContentLoaded', () => {
+    const resultData = sessionStorage.getItem('predictionResult');
+    const imageData = sessionStorage.getItem('capturedImage');
+
+    if (!resultData) {
+        // Redirect if no result
+        window.location.href = '/';
+        return;
+    }
+
+    const result = JSON.parse(resultData);
+    displayResult(result, imageData);
+});
+
+function displayResult(data, imageData) {
+    // Display image
+    if (imageData) {
+        document.getElementById('resultImage').src = imageData;
+    }
+
+    const isPrimary = data.prediction === 'cat';
+    const mainProb = isPrimary ? data.cat_probability : data.dog_probability;
+
+    // Update prediction text
+    const predictionText = document.getElementById('predictionText');
+    predictionText.textContent = `${data.prediction.toUpperCase()} DETECTED!`;
+    predictionText.className = isPrimary ? 'text-cat-blue text-4xl font-black leading-tight tracking-[-0.033em] md:text-5xl' : 'text-dog-orange text-4xl font-black leading-tight tracking-[-0.033em] md:text-5xl';
+
+    // Update confidence
+    document.getElementById('confidenceText').textContent = `${mainProb.toFixed(1)}%`;
+
+    // Update bars
+    document.getElementById('catPercent').textContent = `${data.cat_probability.toFixed(1)}%`;
+    document.getElementById('dogPercent').textContent = `${data.dog_probability.toFixed(1)}%`;
+    document.getElementById('catBar').style.width = `${data.cat_probability}%`;
+    document.getElementById('dogBar').style.width = `${data.dog_probability}%`;
+}
+
+function shareResult() {
+    const resultData = sessionStorage.getItem('predictionResult');
+    if (resultData) {
+        const result = JSON.parse(resultData);
+        const text = `I just classified a ${result.prediction} with ${Math.max(result.cat_probability, result.dog_probability).toFixed(1)}% confidence using Cat vs Dog Detective!`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'Cat vs Dog Detective Result',
+                text: text
+            }).catch(err => console.log('Share failed', err));
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Result copied to clipboard!');
+            });
+        }
+    }
+}
+
+function saveResult() {
+    const imageData = sessionStorage.getItem('capturedImage');
+    if (imageData) {
+        const link = document.createElement('a');
+        link.href = imageData;
+        link.download = 'cat-dog-result.jpg';
+        link.click();
+    }
+}
+</script>
+</body></html>
