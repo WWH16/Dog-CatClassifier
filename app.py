@@ -5,8 +5,6 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 import os
-import base64
-from io import BytesIO
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
@@ -78,46 +76,24 @@ def upload_page():
     return render_template('upload.html')
 
 
-@app.route('/camera')
-def camera_page():
-    return render_template('camera.html')
-
-
-@app.route('/result')
-def result_page():
-    return render_template('result.html')
-
-
 @app.route('/api/predict', methods=['POST'])
 def predict():
     """API endpoint for image prediction"""
     try:
         # Check if image is in request
-        if 'image' not in request.files and 'image_data' not in request.form:
+        if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
 
-        # Handle file upload
-        if 'image' in request.files:
-            file = request.files['image']
+        file = request.files['image']
 
-            if file.filename == '':
-                return jsonify({'error': 'No file selected'}), 400
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
 
-            if not allowed_file(file.filename):
-                return jsonify({'error': 'Invalid file type. Allowed: JPG, PNG, WebP'}), 400
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type. Allowed: JPG, PNG, WebP'}), 400
 
-            # Open image
-            image = Image.open(file.stream).convert('RGB')
-
-        # Handle base64 image (from camera)
-        elif 'image_data' in request.form:
-            image_data = request.form['image_data']
-            # Remove data URL prefix if present
-            if ',' in image_data:
-                image_data = image_data.split(',')[1]
-
-            image_bytes = base64.b64decode(image_data)
-            image = Image.open(BytesIO(image_bytes)).convert('RGB')
+        # Open image
+        image = Image.open(file.stream).convert('RGB')
 
         # Get prediction
         result = predict_image(image)
