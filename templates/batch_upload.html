@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Batch Upload - Cat vs Dog Detective</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-blue-500 text-3xl">pets</span>
+                    <h2 class="text-xl font-bold" style="font-family: 'Poppins', sans-serif;">Cat vs Dog Detective</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{{ url_for('dashboard') }}" class="text-blue-500 hover:text-blue-600 font-medium">← Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:text-red-600 font-medium">Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <h1 class="text-3xl font-bold mb-8">Batch Upload</h1>
+
+            <!-- Upload Area -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <div id="drop-area" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-blue-500 transition-colors">
+                    <span class="material-symbols-outlined text-blue-500 text-6xl mb-4">cloud_upload</span>
+                    <h3 class="text-xl font-bold mb-2">Drag & Drop Multiple Images</h3>
+                    <p class="text-gray-600 mb-4">or click to select files</p>
+                    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
+                    <label for="file-input" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg font-medium cursor-pointer hover:bg-blue-600">
+                        Select Files
+                    </label>
+                    <p class="text-sm text-gray-500 mt-4">JPG, PNG, WebP. Max 10 images, 5MB each</p>
+                </div>
+
+                <div id="file-list" class="mt-6 hidden">
+                    <h3 class="font-bold mb-3">Selected Files:</h3>
+                    <div id="file-items" class="space-y-2"></div>
+                    <button id="upload-btn" class="mt-4 bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600">
+                        Upload & Predict All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="results-section" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Results</h2>
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Filename</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prediction</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-body" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-8 text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-lg font-medium">Processing images...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const fileItems = document.getElementById('file-items');
+        const uploadBtn = document.getElementById('upload-btn');
+        const resultsSection = document.getElementById('results-section');
+        const resultsBody = document.getElementById('results-body');
+        const loading = document.getElementById('loading');
+
+        let selectedFiles = [];
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => {
+                dropArea.classList.add('border-blue-500', 'bg-blue-50');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => {
+                dropArea.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+        });
+
+        dropArea.addEventListener('drop', e => {
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', e => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        dropArea.addEventListener('click', e => {
+            if (e.target.id !== 'file-input' && e.target.tagName !== 'LABEL') {
+                fileInput.click();
+            }
+        });
+
+        function handleFiles(files) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            const validFiles = files.filter(f => validTypes.includes(f.type) && f.size <= 5 * 1024 * 1024);
+
+            if (validFiles.length === 0) {
+                alert('Please select valid image files (JPG, PNG, WebP) under 5MB');
+                return;
+            }
+
+            if (validFiles.length > 10) {
+                alert('Maximum 10 images allowed');
+                return;
+            }
+
+            selectedFiles = validFiles;
+            displayFileList();
+        }
+
+        function displayFileList() {
+            fileItems.innerHTML = '';
+            selectedFiles.forEach((file, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-gray-50 px-4 py-2 rounded';
+                div.innerHTML = `
+                    <span class="text-sm">${file.name}</span>
+                    <button onclick="removeFile(${idx})" class="text-red-500 hover:text-red-600">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                `;
+                fileItems.appendChild(div);
+            });
+            fileList.classList.remove('hidden');
+        }
+
+        window.removeFile = function(idx) {
+            selectedFiles.splice(idx, 1);
+            if (selectedFiles.length === 0) {
+                fileList.classList.add('hidden');
+            } else {
+                displayFileList();
+            }
+        };
+
+        uploadBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            loading.classList.remove('hidden');
+            resultsBody.innerHTML = '';
+            resultsSection.classList.add('hidden');
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('images', file);
+            });
+
+            try {
+                const res = await fetch('/api/batch-predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                loading.classList.add('hidden');
+
+                if (data.success) {
+                    displayResults(data.results);
+                } else {
+                    alert('Error: ' + (data.error || 'Upload failed'));
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                alert('Error: ' + err.message);
+            }
+        });
+
+        function displayResults(results) {
+            resultsBody.innerHTML = '';
+            results.forEach(r => {
+                const row = document.createElement('tr');
+                const statusColor = r.success ? 'text-green-600' : 'text-red-600';
+                const predColor = r.prediction === 'cat' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-sm">${r.filename}</td>
+                    <td class="px-6 py-4 text-sm ${statusColor} font-medium">
+                        ${r.success ? '✓ Success' : '✗ Failed'}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${r.success ? `
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${predColor}">
+                                <span class="material-symbols-outlined text-sm">pets</span>
+                                ${r.prediction.toUpperCase()}
+                            </span>
+                        ` : `<span class="text-red-500 text-sm">${r.error}</span>`}
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        ${r.success ? (r.prediction === 'cat' ? r.cat_probability : r.dog_probability) + '%' : '-'}
+                    </td>
+                `;
+                resultsBody.appendChild(row);
+            });
+            resultsSection.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

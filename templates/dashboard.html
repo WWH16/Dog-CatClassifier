@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dashboard - Cat vs Dog Detective</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        .font-display-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+        .chart-bar {
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+<div class="min-h-screen flex flex-col">
+    <!-- TopNavBar -->
+    <header class="border-b border-gray-200 px-6 sm:px-10 py-4 bg-white">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4 text-blue-500">
+                <a href="{{ url_for('index') }}" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                    <h2 class="font-display-poppins text-xl font-bold">Cat vs Dog Detective</h2>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <span class="hidden sm:inline text-gray-700 font-medium">
+                    Welcome, {{ current_user.username }}!
+                </span>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('upload_page') }}" class="flex items-center gap-1 px-4 py-2 text-blue-500 border border-blue-500 rounded-full font-medium hover:bg-blue-50 transition-colors">
+                        <span class="material-symbols-outlined text-lg">upload_file</span>
+                        <span class="hidden sm:inline">Upload</span>
+                    </a>
+                    <a href="{{ url_for('batch_upload_page') }}" class="flex items-center gap-1 px-4 py-2 text-green-500 border border-green-500 rounded-full font-medium hover:bg-green-50 transition-colors">
+                        <span class="material-symbols-outlined text-lg">cloud_upload</span>
+                        <span class="hidden sm:inline">Batch</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="flex items-center gap-1 px-4 py-2 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors">
+                        <span class="material-symbols-outlined text-lg">logout</span>
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="max-w-7xl mx-auto mb-6">
+                    {% for category, message in messages %}
+                        <div class="p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-green-100 text-green-700 border border-green-200{% endif %}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined">
+                                        {% if category == 'error' %}error{% else %}check_circle{% endif %}
+                                    </span>
+                                    <span>{{ message }}</span>
+                                </div>
+                                <button onclick="this.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="max-w-7xl mx-auto">
+            <!-- Dashboard Header -->
+            <div class="mb-8">
+                <h1 class="font-display-poppins text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                <p class="text-gray-600">Overview of your image classifications and statistics</p>
+            </div>
+
+            <!-- Quick Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Total Predictions -->
+                <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Total Predictions</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ stats.total or 0 }}</p>
+                        </div>
+                        <div class="p-3 bg-blue-100 rounded-full">
+                            <span class="material-symbols-outlined text-blue-500 text-2xl">analytics</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">All-time classifications</p>
+                    </div>
+                </div>
+
+                <!-- Cats Detected -->
+                <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Cats Detected</p>
+                            <p class="text-3xl font-bold text-blue-500">{{ stats.cats or 0 }}</p>
+                        </div>
+                        <div class="p-3 bg-blue-100 rounded-full">
+                            <span class="material-symbols-outlined text-blue-500 text-2xl">pets</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">
+                            {% if stats.total and stats.total > 0 %}
+                                {{ ((stats.cats or 0) / stats.total * 100)|round|int }}% of total
+                            {% else %}
+                                0% of total
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Dogs Detected -->
+                <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Dogs Detected</p>
+                            <p class="text-3xl font-bold text-orange-500">{{ stats.dogs or 0 }}</p>
+                        </div>
+                        <div class="p-3 bg-orange-100 rounded-full">
+                            <span class="material-symbols-outlined text-orange-500 text-2xl">pets</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">
+                            {% if stats.total and stats.total > 0 %}
+                                {{ ((stats.dogs or 0) / stats.total * 100)|round|int }}% of total
+                            {% else %}
+                                0% of total
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Bar Chart -->
+<div class="bg-white rounded-xl shadow p-6 border border-gray-200 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-gray-900">Distribution Chart</h2>
+        <span class="material-symbols-outlined text-gray-400">bar_chart</span>
+    </div>
+
+    {% set cats = stats.cats or 0 %}
+    {% set dogs = stats.dogs or 0 %}
+    {% set total = stats.total or 1 %}
+    {% if cats > dogs %}
+        {% set max_count = cats %}
+    {% else %}
+        {% set max_count = dogs %}
+    {% endif %}
+    {% if max_count == 0 %}
+        {% set max_count = 1 %}
+    {% endif %}
+
+    {% set cat_percent = (cats / total * 100) %}
+    {% set dog_percent = (dogs / total * 100) %}
+
+    {% if total > 0 and (cats > 0 or dogs > 0) %}
+    <div class="space-y-6 border-l border-b border-gray-300 pl-8 pb-6">
+        <!-- Cats Bar -->
+        <div class="flex items-center gap-4">
+            <span class="w-20 font-medium text-blue-600">Cats</span>
+            <div class="flex-1 flex items-center gap-4">
+                <div class="h-12 bg-blue-500 rounded-r-lg chart-bar transition-all duration-600"
+                     style="width: {% if cats > 0 %}{{ (cats / max_count * 100) }}%{% else %}0{% endif %}; max-width: 100%;"></div>
+                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ cats }} ({{ cat_percent|round(1) }}%)</span>
+            </div>
+        </div>
+
+        <!-- Dogs Bar -->
+        <div class="flex items-center gap-4">
+            <span class="w-20 font-medium text-orange-600">Dogs</span>
+            <div class="flex-1 flex items-center gap-4">
+                <div class="h-12 bg-orange-500 rounded-r-lg chart-bar transition-all duration-600"
+                     style="width: {% if dogs > 0 %}{{ (dogs / max_count * 100) }}%{% else %}0{% endif %}; max-width: 100%;"></div>
+                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ dogs }} ({{ dog_percent|round(1) }}%)</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-10">
+        <span class="material-symbols-outlined text-gray-300 text-5xl mb-3">bar_chart</span>
+        <p class="text-gray-500">No predictions yet. Start classifying images!</p>
+    </div>
+    {% endif %}
+</div>
+
+            <!-- Quick Actions (No Recent Predictions) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a href="{{ url_for('upload_page') }}"
+                   class="bg-white rounded-xl shadow p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Single Image Upload</h3>
+                            <p class="text-gray-600 mb-4">Upload and classify one image at a time</p>
+                        </div>
+                        <span class="material-symbols-outlined text-blue-500 text-3xl group-hover:scale-110 transition-transform">upload_file</span>
+                    </div>
+                    <div class="flex items-center text-blue-500 font-medium">
+                        <span>Start classifying</span>
+                        <span class="material-symbols-outlined ml-2">arrow_forward</span>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('batch_upload_page') }}"
+                   class="bg-white rounded-xl shadow p-6 border border-gray-200 hover:border-green-300 hover:shadow-md transition-all group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Batch Upload</h3>
+                            <p class="text-gray-600 mb-4">Upload and classify multiple images at once</p>
+                        </div>
+                        <span class="material-symbols-outlined text-green-500 text-3xl group-hover:scale-110 transition-transform">cloud_upload</span>
+                    </div>
+                    <div class="flex items-center text-green-500 font-medium">
+                        <span>Process multiple images</span>
+                        <span class="material-symbols-outlined ml-2">arrow_forward</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Empty State Message -->
+            {% if not predictions or predictions|length == 0 %}
+            <div class="mt-8 text-center">
+                <div class="bg-white rounded-xl shadow p-8 border border-gray-200">
+                    <span class="material-symbols-outlined text-gray-300 text-6xl mb-4">image_search</span>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">No predictions yet</h3>
+                    <p class="text-gray-600 mb-6">Start classifying images to see your statistics and history</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{{ url_for('upload_page') }}"
+                           class="inline-flex items-center justify-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                            <span class="material-symbols-outlined">upload_file</span>
+                            Upload Single Image
+                        </a>
+                        <a href="{{ url_for('batch_upload_page') }}"
+                           class="inline-flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition-colors">
+                            <span class="material-symbols-outlined">cloud_upload</span>
+                            Upload Multiple Images
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="border-t border-gray-200 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-600 mb-4 md:mb-0">© 2024 Cat vs Dog Detective. All rights reserved.</p>
+            <div class="flex gap-6">
+                <span class="text-gray-500">{{ stats.total or 0 }} total predictions</span>
+                <a href="{{ url_for('logout') }}" class="text-blue-500 hover:text-blue-600 font-medium">Logout</a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // Animate chart bars on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const bars = document.querySelectorAll('.chart-bar');
+        bars.forEach(bar => {
+            const originalWidth = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = originalWidth;
+            }, 300);
+        });
+    });
+
+    // Auto-dismiss flash messages after 5 seconds
+    setTimeout(() => {
+        const flashMessages = document.querySelectorAll('[class*="bg-red-100"], [class*="bg-green-100"]');
+        flashMessages.forEach(msg => {
+            msg.style.opacity = '0';
+            msg.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => msg.remove(), 500);
+        });
+    }, 5000);
+</script>
+</body>
+</html>
