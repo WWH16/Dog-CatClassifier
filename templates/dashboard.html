@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .font-display-poppins {
             font-family: 'Poppins', sans-serif;
@@ -81,7 +82,8 @@
             </div>
 
             <!-- Quick Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+
                 <!-- Total Predictions -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex items-center justify-between">
@@ -141,61 +143,91 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- Average Confidence -->
+                <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Avg Confidence</p>
+                            <p class="text-3xl font-bold text-gray-900" id="avgConfidenceValue">0%</p>
+                        </div>
+                        <div class="p-3 bg-purple-100 rounded-full">
+                            <span class="material-symbols-outlined text-purple-500 text-2xl">verified</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">Overall model confidence</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Fixed Bar Chart -->
-<div class="bg-white rounded-xl shadow p-6 border border-gray-200 mb-8">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-gray-900">Distribution Chart</h2>
-        <span class="material-symbols-outlined text-gray-400">bar_chart</span>
-    </div>
+            <div class="bg-white rounded-xl shadow p-6 border border-gray-200 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Distribution Chart</h2>
+                    <span class="material-symbols-outlined text-gray-400">bar_chart</span>
+                </div>
 
-    {% set cats = stats.cats or 0 %}
-    {% set dogs = stats.dogs or 0 %}
-    {% set total = stats.total or 1 %}
-    {% if cats > dogs %}
-        {% set max_count = cats %}
-    {% else %}
-        {% set max_count = dogs %}
-    {% endif %}
-    {% if max_count == 0 %}
-        {% set max_count = 1 %}
-    {% endif %}
+                {% set cats = stats.cats or 0 %}
+                {% set dogs = stats.dogs or 0 %}
+                {% set total = stats.total or 1 %}
+                {% if cats > dogs %}
+                    {% set max_count = cats %}
+                {% else %}
+                    {% set max_count = dogs %}
+                {% endif %}
+                {% if max_count == 0 %}
+                    {% set max_count = 1 %}
+                {% endif %}
 
-    {% set cat_percent = (cats / total * 100) %}
-    {% set dog_percent = (dogs / total * 100) %}
+                {% set cat_percent = (cats / total * 100) %}
+                {% set dog_percent = (dogs / total * 100) %}
 
-    {% if total > 0 and (cats > 0 or dogs > 0) %}
-    <div class="space-y-6 border-l border-b border-gray-300 pl-8 pb-6">
-        <!-- Cats Bar -->
-        <div class="flex items-center gap-4">
-            <span class="w-20 font-medium text-blue-600">Cats</span>
-            <div class="flex-1 flex items-center gap-4">
-                <div class="h-12 bg-blue-500 rounded-r-lg chart-bar transition-all duration-600"
-                     style="width: {% if cats > 0 %}{{ (cats / max_count * 100) }}%{% else %}0{% endif %}; max-width: 100%;"></div>
-                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ cats }} ({{ cat_percent|round(1) }}%)</span>
+                {% if total > 0 and (cats > 0 or dogs > 0) %}
+                <div class="space-y-6 border-l border-b border-gray-300 pl-8 pb-6">
+                    <!-- Cats Bar -->
+                    <div class="flex items-center gap-4">
+                        <span class="w-20 font-medium text-blue-600">Cats</span>
+                        <div class="flex-1 flex items-center gap-4">
+                            <div class="h-12 bg-blue-500 rounded-r-lg chart-bar transition-all duration-600"
+                                 style="width: {% if cats > 0 %}{{ (cats / max_count * 100) }}%{% else %}0{% endif %}; max-width: 100%;"></div>
+                            <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ cats }} ({{ cat_percent|round(1) }}%)</span>
+                        </div>
+                    </div>
+
+                    <!-- Dogs Bar -->
+                    <div class="flex items-center gap-4">
+                        <span class="w-20 font-medium text-orange-600">Dogs</span>
+                        <div class="flex-1 flex items-center gap-4">
+                            <div class="h-12 bg-orange-500 rounded-r-lg chart-bar transition-all duration-600"
+                                 style="width: {% if dogs > 0 %}{{ (dogs / max_count * 100) }}%{% else %}0{% endif %}; max-width: 100%;"></div>
+                            <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ dogs }} ({{ dog_percent|round(1) }}%)</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-10">
+                    <span class="material-symbols-outlined text-gray-300 text-5xl mb-3">bar_chart</span>
+                    <p class="text-gray-500">No predictions yet. Start classifying images!</p>
+                </div>
+                {% endif %}
             </div>
-        </div>
+            <!-- Advanced Analytics -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Predictions Over Time -->
+                <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4">Predictions Over Time</h2>
+                    <canvas id="predictionsOverTime"></canvas>
+                </div>
 
-        <!-- Dogs Bar -->
-        <div class="flex items-center gap-4">
-            <span class="w-20 font-medium text-orange-600">Dogs</span>
-            <div class="flex-1 flex items-center gap-4">
-                <div class="h-12 bg-orange-500 rounded-r-lg chart-bar transition-all duration-600"
-                     style="width: {% if dogs > 0 %}{{ (dogs / max_count * 100) }}%{% else %}0{% endif %}; max-width: 100%;"></div>
-                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ dogs }} ({{ dog_percent|round(1) }}%)</span>
+                <!-- Daily Cat vs Dog Predictions -->
+                <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4">Daily Cat vs Dog Predictions</h2>
+                    <canvas id="catDogDaily"></canvas>
+                </div>
             </div>
-        </div>
-    </div>
-    {% else %}
-    <div class="text-center py-10">
-        <span class="material-symbols-outlined text-gray-300 text-5xl mb-3">bar_chart</span>
-        <p class="text-gray-500">No predictions yet. Start classifying images!</p>
-    </div>
-    {% endif %}
-</div>
 
-            <!-- Quick Actions (No Recent Predictions) -->
+            <!-- Quick Actions -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <a href="{{ url_for('upload_page') }}"
                    class="bg-white rounded-xl shadow p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all group">
@@ -286,6 +318,155 @@
             setTimeout(() => msg.remove(), 500);
         });
     }, 5000);
+
+    // ==========================
+    // Prepare prediction data
+    // ==========================
+    const predictions = [
+        {% for p in predictions %}
+        {
+            prediction: "{{ p.prediction }}",
+            cat: {{ p.cat_probability }},
+            dog: {{ p.dog_probability }},
+            date: "{{ p.created_at[:10] }}" // YYYY-MM-DD
+        },
+        {% endfor %}
+    ];
+
+    // ==========================
+    // 1. DAILY Predictions Over Time
+    // ==========================
+    const dailyCounts = {};
+
+    predictions.forEach(p => {
+        dailyCounts[p.date] = (dailyCounts[p.date] || 0) + 1;
+    });
+
+    // Sort dates chronologically
+    const sortedDates = Object.keys(dailyCounts).sort(
+        (a, b) => new Date(a) - new Date(b)
+    );
+
+    const dailyValues = sortedDates.map(date => dailyCounts[date]);
+
+    new Chart(document.getElementById('predictionsOverTime'), {
+        type: 'line',
+        data: {
+            labels: sortedDates,
+            datasets: [{
+                label: 'Daily Predictions',
+                data: dailyValues,
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                tension: 0.35,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // ==========================
+    // 2. Daily Cat vs Dog Predictions
+    // ==========================
+    const dailyCatCounts = {};
+    const dailyDogCounts = {};
+
+    predictions.forEach(p => {
+        if (!dailyCatCounts[p.date]) {
+            dailyCatCounts[p.date] = 0;
+            dailyDogCounts[p.date] = 0;
+        }
+
+        if (p.prediction === 'cat') dailyCatCounts[p.date]++;
+        if (p.prediction === 'dog') dailyDogCounts[p.date]++;
+    });
+
+    const sortedDailyDates = Object.keys(dailyCatCounts).sort(
+        (a, b) => new Date(a) - new Date(b)
+    );
+
+    new Chart(document.getElementById('catDogDaily'), {
+        type: 'line',
+        data: {
+            labels: sortedDailyDates,
+            datasets: [
+                {
+                    label: 'Cats',
+                    data: sortedDailyDates.map(d => dailyCatCounts[d]),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.35,
+                    fill: true
+                },
+                {
+                    label: 'Dogs',
+                    data: sortedDailyDates.map(d => dailyDogCounts[d]),
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.35,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // ==========================
+    // 3. Calculate Confidence Scores
+    // ==========================
+    let totalConfidence = 0;
+    let catConfidenceSum = 0;
+    let dogConfidenceSum = 0;
+    let catCount = 0;
+    let dogCount = 0;
+
+    predictions.forEach(p => {
+        const confidence = p.prediction === 'cat' ? p.cat : p.dog;
+        totalConfidence += confidence;
+
+        if (p.prediction === 'cat') {
+            catConfidenceSum += p.cat;
+            catCount++;
+        } else {
+            dogConfidenceSum += p.dog;
+            dogCount++;
+        }
+    });
+
+    const avgConfidence = predictions.length > 0 ? totalConfidence / predictions.length : 0;
+    const avgCatConfidence = catCount > 0 ? catConfidenceSum / catCount : 0;
+    const avgDogConfidence = dogCount > 0 ? dogConfidenceSum / dogCount : 0;
+
+    // Update card values
+    document.getElementById('avgConfidenceValue').textContent = avgConfidence.toFixed(1) + '%';
+    document.getElementById('avgCatConfidence').textContent = avgCatConfidence.toFixed(1) + '%';
+    document.getElementById('avgDogConfidence').textContent = avgDogConfidence.toFixed(1) + '%';
+
+
 </script>
+
 </body>
 </html>
